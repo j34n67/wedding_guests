@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mariage d'Emmanuel & Jean - Tableau de Bord</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap');
+
+        :root {
+            --primary-font: 'Montserrat', sans-serif;
+            --secondary-font: 'Playfair Display', serif;
+            --bg-color: #f0f7f8; /* Light Teal Background */
+            --text-color: #333333;
+            --primary-color: #008080; /* Teal */
+            --secondary-color: #4682B4; /* Steel Blue */
+            --accent-color: #20B2AA; /* Light Sea Green */
+            --alert-color: #c0392b; /* Muted Red for alerts */
+            --light-gray: #e0e0e0; /* Light Grey */
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: var(--primary-font);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+       .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        header h1 {
+            font-family: var(--secondary-font);
+            font-size: 3rem;
+            margin: 0;
+        }
+
+        nav {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        h2 {
+            font-family: var(--secondary-font);
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+
+       .section {
+            padding-top: 60px;
+            margin-top: -60px;
+        }
+
+        /* KPI Cards */
+       .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            justify-content: center;
+        }
+
+       .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-left: 5px solid var(--accent-color);
+        }
+        
+       .kpi-card .number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+       .kpi-card .label {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* Charts & Tables Grid */
+       .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            align-items: start;
+            justify-content: center;
+        }
+
+       .data-container {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+       .data-container h3 {
+            text-align: center;
+            font-family: var(--primary-font);
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top:0;
+            margin-bottom: 15px;
+        }
+        
+        .contingency-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .contingency-table th, .contingency-table td {
+             padding: 10px 12px;
+             text-align: left;
+             border-bottom: 1px solid #ecf0f1;
+        }
+        .contingency-table th {
+            font-weight: 600;
+            background-color: #f8f8f8;
+        }
+         .contingency-table td:last-child, .contingency-table td:nth-child(2) {
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .summary-row td {
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: #f8f9fa;
+        }
+        
+        /* Guest List Table */
+        #guest-list-controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        #guest-search {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+        }
+        
+        #export-csv-btn {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #export-csv-btn:hover {
+            background-color: #346795;
+        }
+        
+       .table-wrapper {
+            overflow-x: auto;
+        }
+
+        #guest-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        #guest-table th, #guest-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        #guest-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        #guest-table th:hover {
+            background-color: #005f5f; /* Darker Teal */
+        }
+
+        #guest-table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        #guest-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 40px;
+            background: #ecf0f1;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mariage d'Emmanuel & Jean</h1>
+        <p>28 Juin</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#dashboard">Tableau de Bord</a></li>
+            <li><a href="#guest-list">Liste des Invités</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <section id="dashboard" class="section">
+            <h2>Centre de Contrôle</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div id="kpi-total-guests" class="number">0</div>
+                    <div class="label">Participants (invités + prestataires)</div>
+                </div>
+                <div class="kpi-card">
+                    <div id="kpi-special-meals" class="number">0</div>
+                    <div class="label">Repas Spéciaux</div>
+                </div>
+            </div>
+
+            <div class="data-grid">
+                <div class="data-container" id="dietary-needs-container">
+                    <h3>Répartition des Repas</h3>
+                    <div id="dietary-needs-table-wrapper">
+                       <!-- Table will be generated here -->
+                    </div>
+                </div>
+                <div class="data-container">
+                    <h3>Répartition des Chambres</h3>
+                    <div id="room-table-wrapper">
+                       <!-- Table will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="guest-list" class="section">
+            <h2>Liste Complète des Participants</h2>
+            <div id="guest-list-controls">
+                <input type="text" id="guest-search" placeholder="Rechercher un participant...">
+                <button id="export-csv-btn">Exporter en CSV</button>
+            </div>
+            <div class="table-wrapper">
+                <table id="guest-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="name">Nom</th>
+                            <th data-sort="invitedBy">Invité par</th>
+                            <th data-sort="table">Table</th>
+                            <th data-sort="ageGroup">Groupe d'âge</th>
+                            <th data-sort="dietaryNeeds">Besoins Alimentaires</th>
+                            <th data-sort="room">Chambre</th>
+                            <th data-sort="brunch">Brunch 29/06</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guest-table-body">
+                        <!-- Guest list will be generated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Conçu avec soin pour le mariage d'Emmanuel & Jean.</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ======================= DATA SOURCE =======================
+        const guestData = [
+            {"name":"Geneviève Gallais Pradal Potier","email":"","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (2)","brunch":"Oui"},
+            {"name":"Alexis-Joseph Potier","email":"","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Patrick Potier","email":"","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Nicole Potier","email":"potier.nicole402@orange.fr","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Non"},
+            {"name":"Marie-Ange","email":"","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (3)","brunch":"Oui"},
+            {"name":"Martine Potier","email":"","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Jacky Daveau","email":"daveau.jacky.02@orange.fr","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (3)","brunch":"Oui"},
+            {"name":"Eric Pizzol","email":"pizzol.eric@bbox.fr","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (4)","brunch":"Oui"},
+            {"name":"Dominique Potier","email":"dominique.potier1@gmail.com","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (2)","brunch":"Oui"},
+            {"name":"Daniel","email":"","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Non"},
+            {"name":"Christelle Pizzol","email":"pizzol.eric@bbox.fr","invitedBy":"Emmanuel","table":"0","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (4)","brunch":"Oui"},
+            {"name":"Nathalie Claus","email":"","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (13)","brunch":"Oui"},
+            {"name":"Jean-Charles Mutzig","email":"gaby.mutzig@orange.fr","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Non"},
+            {"name":"Henri Klein","email":"henri.fr.klein@orange.fr","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (28)","brunch":"Oui"},
+            {"name":"Gaby Mutzig","email":"gaby.mutzig@orange.fr","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Non"},
+            {"name":"Friedel Klein","email":"henri.fr.klein@orange.fr","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Dorette Tuchscherer","email":"","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (14)","brunch":"Oui"},
+            {"name":"Willy Tuchscherer","email":"","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (14)","brunch":"Oui"},
+            {"name":"Pierre Muller","email":"","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Catherine Muller","email":"","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Annick","email":"","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (29)","brunch":"Non"},
+            {"name":"Remy Claus","email":"","invitedBy":"Jean","table":"1","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (13)","brunch":"Oui"},
+            {"name":"Amandine Navarro","email":"amandine-navarro@orange.fr","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (4)","brunch":"Oui"},
+            {"name":"Wajma Noury","email":"wajma.noury@gmail.com","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (11)","brunch":"Oui"},
+            {"name":"Violaine Prior","email":"mergynathan5@gmail.com","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (3)","brunch":"Oui"},
+            {"name":"Théo","email":"","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (10)","brunch":"En attente"},
+            {"name":"Nathan Mergy","email":"mergynathan5@gmail.com","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (3)","brunch":"Oui"},
+            {"name":"Laurent Van Den Bogaert","email":"wajma.noury@gmail.com","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (11)","brunch":"Oui"},
+            {"name":"Finlay Page","email":"finlay.page33@gmail.com","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (10)","brunch":"Oui"},
+            {"name":"Ikrame Lahmar","email":"ikramelahmar@hotmail.fr","invitedBy":"Emmanuel","table":"2","ageGroup":"Adulte","dietaryNeeds":"sans porc","room":"Cosy (8)","brunch":"Oui"},
+            {"name":"Kexin Feng","email":"maxachouette@gmail.com","invitedBy":"Emmanuel","table":"3","ageGroup":"Adulte","dietaryNeeds":"pas de crustacés","room":"Cosy (5)","brunch":"Oui"},
+            {"name":"Maxime Seiller","email":"seiller.mxm@gmail.com","invitedBy":"Jean","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (10)","brunch":"Oui"},
+            {"name":"Zina Zgarou","email":"zinaneggache@gmail.com","invitedBy":"Jean","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (9)","brunch":"Oui"},
+            {"name":"Romain Lagrafeuille","email":"pinaudclaire@gmail.com","invitedBy":"Emmanuel","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (7)","brunch":"Non"},
+            {"name":"Maxime Rondot","email":"maxachouette@gmail.com","invitedBy":"Emmanuel","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (5)","brunch":"Oui"},
+            {"name":"Flavien Nannini","email":"guillaume.trotobas@gmail.com","invitedBy":"Emmanuel","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (5)","brunch":"Oui"},
+            {"name":"Flavien Marcon","email":"flavien.marcon@yahoo.fr","invitedBy":"Jean","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (27)","brunch":"Non"},
+            {"name":"Claire Lagrafeuille","email":"pinaudclaire@gmail.com","invitedBy":"Emmanuel","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (7)","brunch":"Non"},
+            {"name":"Amine Zgarou","email":"zinaneggache@gmail.com","invitedBy":"Jean","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (9)","brunch":"Oui"},
+            {"name":"Pierre Dufour","email":"seiller.mxm@gmail.com","invitedBy":"Jean","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (10)","brunch":"Oui"},
+            {"name":"Guillaume Trotobas","email":"guillaume.trotobas@gmail.com","invitedBy":"Emmanuel","table":"3","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (5)","brunch":"Oui"},
+            {"name":"Tristan Specht","email":"iris.legbre@gmail.com","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (24)","brunch":"Oui"},
+            {"name":"Maryam","email":"","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (25)","brunch":"Oui"},
+            {"name":"Lise Mercier","email":"lise.mercier94@gmail.com","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"Végétarien","room":"Cosy (26)","brunch":"Non"},
+            {"name":"Iris Legbre","email":"iris.legbre@gmail.com","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (24)","brunch":"Oui"},
+            {"name":"Cyril Andlauer","email":"lise.mercier94@gmail.com","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (26)","brunch":"Non"},
+            {"name":"Adel","email":"","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (9)","brunch":"Oui"},
+            {"name":"Marion Velut","email":"","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (9)","brunch":"Oui"},
+            {"name":"Yann Diserbeau","email":"","invitedBy":"Jean","table":"4","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (25)","brunch":"Oui"},
+            {"name":"Luc Muller","email":"","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Laura Claus","email":"clauslaura89@gmail.com","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"sans porc","room":"Cosy (15)","brunch":"Oui"},
+            {"name":"Joanna","email":"","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (18)","brunch":"Oui"},
+            {"name":"Emmanuel Jaeckel","email":"","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (17)","brunch":"Non"},
+            {"name":"Stéphane Tuchscherer","email":"steftuch@orange.fr","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (18)","brunch":"Oui"},
+            {"name":"Aline Jaeckel","email":"aline.claus@hotmail.fr","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (17)","brunch":"Non"},
+            {"name":"Daroueche Chadouli","email":"clauslaura89@gmail.com","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"sans porc","room":"Cosy (15)","brunch":"Oui"},
+            {"name":"Oscar Chadouli","email":"clauslaura89@gmail.com","invitedBy":"Jean","table":"5","ageGroup":"bébé","dietaryNeeds":"","room":"Cosy (15)","brunch":"Oui"},
+            {"name":"Christian Klein","email":"christian.klein671@gmail.com","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Non"},
+            {"name":"Caroline Sieger","email":"sieger.caroline@yahoo.fr","invitedBy":"Jean","table":"5","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Sophie Schubnel","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (20)","brunch":"Oui"},
+            {"name":"Vanessa Rauch","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Frédéric Rauch","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Frédéric Muller","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"David Schubnel","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (20)","brunch":"Oui"},
+            {"name":"Christine Rauch","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Anne Logel","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Tata Irène","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Non"},
+            {"name":"Mathieu","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Elisabeth","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Pierre Rauch","email":"","invitedBy":"Jean","table":"6","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Jean-Baptiste Bodin","email":"jeanb.bodin@gmail.com","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (8)","brunch":"Non"},
+            {"name":"Guillaume Schoffit","email":"elodie.wolff@gmail.com","invitedBy":"Jean","table":"8","ageGroup":"Adulte","dietaryNeeds":"Végétarien","room":"Cocoon (2)","brunch":"Oui"},
+            {"name":"Elodie Wolff","email":"elodie.wolff@gmail.com","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"Végétarien","room":"Cocoon (2)","brunch":"Oui"},
+            {"name":"Romuald Goujon","email":"lealoulou@free.fr","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (7)","brunch":"Oui"},
+            {"name":"Gabriel","email":"","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"Végétarien","room":"Cocoon (6)","brunch":"Oui"},
+            {"name":"Bertrand Lambert","email":"anthony.ikni90@gmail.com","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (12)","brunch":"Oui"},
+            {"name":"Léa Loubier","email":"lealoulou@free.fr","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (7)","brunch":"Oui"},
+            {"name":"Christophe Buffet","email":"christophe.buffet@hotmail.fr","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (6)","brunch":"Oui"},
+            {"name":"Marion Lecardonnel","email":"marion.lecardonnel@gmail.com","invitedBy":"Jean","table":"8","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (8)","brunch":"Oui"},
+            {"name":"Anthony Ikni","email":"anthony.ikni90@gmail.com","invitedBy":"Emmanuel","table":"8","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (12)","brunch":"Oui"},
+            {"name":"Thomas Bertrand","email":"aurelie.daveau@laposte.net","invitedBy":"Emmanuel","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (6)","brunch":"Oui"},
+            {"name":"Melvin Hanquet","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (21)","brunch":"Oui"},
+            {"name":"Lucie Tuchscherer","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (19)","brunch":"Oui"},
+            {"name":"Albane","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (23)","brunch":"Oui"},
+            {"name":"Morgane Schubnel","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (21)","brunch":"Oui"},
+            {"name":"Marine Schubnel","email":"marine.schubnel@gmail.com","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (22)","brunch":"Oui"},
+            {"name":"Laura Stelling","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Julie Rauch","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Jules Muller","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Hugo Schubnel","email":"","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy (23)","brunch":"Oui"},
+            {"name":"Guyomarc'h Negaret","email":"elisa67110@gmail.com","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Elisa Muller","email":"elisa67110@gmail.com","invitedBy":"Jean","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Aurélie Bertrand","email":"aurelie.daveau@laposte.net","invitedBy":"Emmanuel","table":"9","ageGroup":"Adulte","dietaryNeeds":"pas de poisson","room":"Cosy (6)","brunch":"Oui"},
+            {"name":"Agathe Pizzol","email":"pizzol.eric@bbox.fr","invitedBy":"Emmanuel","table":"9","ageGroup":"Adulte","dietaryNeeds":"","room":"Cosy","brunch":"Oui"},
+            {"name":"Charlotte","email":"","invitedBy":"Jean","table":"10","ageGroup":"preado","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Sarah","email":"","invitedBy":"Jean","table":"10","ageGroup":"preado","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Romane Rauch","email":"","invitedBy":"Jean","table":"11","ageGroup":"enfant","dietaryNeeds":"","room":"Pas de chambre","brunch":"Oui"},
+            {"name":"Nina Jaeckel","email":"","invitedBy":"Jean","table":"10","ageGroup":"preado","dietaryNeeds":"","room":"Cosy (16)","brunch":"Non"},
+            {"name":"Matias","email":"","invitedBy":"Jean","table":"10","ageGroup":"preado","dietaryNeeds":"","room":"Cosy (19)","brunch":"Oui"},
+            {"name":"Marc Lagrafeuille","email":"pinaudclaire@gmail.com","invitedBy":"Emmanuel","table":"11","ageGroup":"enfant","dietaryNeeds":"","room":"Cosy (7)","brunch":"Non"},
+            {"name":"Louka Chadouli","email":"clauslaura89@gmail.com","invitedBy":"Jean","table":"11","ageGroup":"enfant","dietaryNeeds":"sans porc","room":"Cosy (16)","brunch":"Oui"},
+            {"name":"Jana Jaeckel","email":"","invitedBy":"Jean","table":"11","ageGroup":"enfant","dietaryNeeds":"","room":"Cosy (16)","brunch":"Non"},
+            {"name":"Isaac Zgarou","email":"","invitedBy":"Jean","table":"11","ageGroup":"enfant","dietaryNeeds":"","room":"Cocoon (9)","brunch":"Oui"},
+            {"name":"Djoun Chadouli","email":"clauslaura89@gmail.com","invitedBy":"Jean","table":"11","ageGroup":"enfant","dietaryNeeds":"sans porc","room":"Cosy (16)","brunch":"Oui"},
+            {"name":"Clément Schubnel","email":"","invitedBy":"Jean","table":"10","ageGroup":"preado","dietaryNeeds":"","room":"Cosy (22)","brunch":"Oui"},
+            {"name":"Ambre Bertrand","email":"aurelie.daveau@laposte.net","invitedBy":"Emmanuel","table":"11","ageGroup":"enfant","dietaryNeeds":"","room":"Cosy","brunch":"Oui"},
+            {"name":"Ambre (Jean)","email":"","invitedBy":"Jean","table":"10","ageGroup":"enfant","dietaryNeeds":"","room":"Cosy (19)","brunch":"Oui"},
+            {"name":"Yunus Kiliç","email":"","invitedBy":"Emmanuel","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"sans porc","room":"Suite (5)","brunch":"Oui"},
+            {"name":"Thibault Simeoni","email":"charlotte.roposte@gmail.com","invitedBy":"Jean","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"","room":"Suite (4)","brunch":"Oui"},
+            {"name":"Nolwenn Perrin","email":"yvesmariethiec@yahoo.fr","invitedBy":"Emmanuel","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"Végétarien","room":"Suite (4)","brunch":"Oui"},
+            {"name":"Yves-Marie Thiec","email":"yvesmariethiec@yahoo.fr","invitedBy":"Emmanuel","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"","room":"Suite (4)","brunch":"Oui"},
+            {"name":"Kevin Boucaud","email":"mulclemence@gmail.com","invitedBy":"Jean","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"","room":"Suite (2)","brunch":"Oui"},
+            {"name":"Jean (marié)","email":"","invitedBy":"Jean","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"","room":"Suite (1)","brunch":"Oui"},
+            {"name":"Gisèle Boucaud","email":"","invitedBy":"Jean","table":"Honneur","ageGroup":"bébé","dietaryNeeds":"","room":"Suite (2)","brunch":"Oui"},
+            {"name":"Florent","email":"","invitedBy":"Emmanuel","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"sans porc","room":"Suite (5)","brunch":"Oui"},
+            {"name":"Emmanuel (marié)","email":"","invitedBy":"Emmanuel","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"","room":"Suite (1)","brunch":"Oui"},
+            {"name":"Clemence Muller Boucaud","email":"mulclemence@gmail.com","invitedBy":"Jean","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"","room":"Suite (2)","brunch":"Oui"},
+            {"name":"Charlotte Roposte","email":"charlotte.roposte@gmail.com","invitedBy":"Jean","table":"Honneur","ageGroup":"Adulte","dietaryNeeds":"","room":"Suite (3)","brunch":"Oui"},
+            {"name":"Camille (photographe)","email":"","invitedBy":"Prestataire","table":"Prestataires","ageGroup":"Adulte","dietaryNeeds":"","room":"Pas de chambre","brunch":"Non"},
+            {"name":"Alexandre (DJ)","email":"","invitedBy":"Prestataire","table":"Prestataires","ageGroup":"Adulte","dietaryNeeds":"","room":"Cocoon (11)","brunch":"Non"},
+            {"name":"Salomé Pizzol","email":"pizzol.eric@bbox.fr","invitedBy":"Emmanuel","table":"9","ageGroup":"preado","dietaryNeeds":"","room":"Cosy","brunch":"Oui"},
+            {"name":"Nounou", "email":"", "invitedBy":"Prestataire", "table":"11", "ageGroup":"preado", "dietaryNeeds":"", "room":"Pas de chambre", "brunch":"Non"}
+        ];
+
+        function setupDashboard() {
+            // KPIs
+            const totalGuests = guestData.length;
+            const specialMeals = guestData.filter(g => g.dietaryNeeds && g.dietaryNeeds.trim() !== "" && g.dietaryNeeds.trim().toLowerCase() !== "aucun").length;
+
+            document.getElementById('kpi-total-guests').textContent = totalGuests;
+            document.getElementById('kpi-special-meals').textContent = specialMeals;
+            
+            Chart.defaults.font.family = "'Montserrat', sans-serif";
+            Chart.defaults.color = '#555';
+
+            // Dietary Needs Table
+            const dietaryNeedsWrapper = document.getElementById('dietary-needs-table-wrapper');
+            dietaryNeedsWrapper.innerHTML = ''; 
+
+            const dietaryBreakdown = {};
+            const childAgeGroups = ['enfant', 'bébé'];
+            const adoAgeGroup = 'preado';
+            let totalAdults = 0, totalAdos = 0, totalChildren = 0;
+
+            guestData.forEach(g => {
+                let ageCategory = 'Adulte';
+                if (childAgeGroups.includes(g.ageGroup)) {
+                    ageCategory = 'Enfant';
+                    totalChildren++;
+                } else if (g.ageGroup === adoAgeGroup) {
+                    ageCategory = 'Adolescent';
+                    totalAdos++;
+                } else {
+                    totalAdults++;
+                }
+                
+                const diet = (g.dietaryNeeds && g.dietaryNeeds.trim() !== '' && g.dietaryNeeds.toLowerCase() !== 'aucun') ? g.dietaryNeeds.trim() : 'Standard';
+                const key = `${ageCategory} - ${diet}`;
+
+                dietaryBreakdown[key] = (dietaryBreakdown[key] || 0) + 1;
+            });
+            
+            const table = document.createElement('table');
+            table.className = 'contingency-table';
+            table.innerHTML = `<thead><tr><th>Type de Repas</th><th>Nombre</th></tr></thead><tbody></tbody>`;
+            const tbody = table.querySelector('tbody');
+
+            // Add summary rows first
+            tbody.innerHTML = `
+                <tr class="summary-row"><td>Total Adultes</td><td>${totalAdults}</td></tr>
+                <tr class="summary-row"><td>Total Adolescents</td><td>${totalAdos}</td></tr>
+                <tr class="summary-row"><td>Total Enfants</td><td>${totalChildren}</td></tr>
+            `;
+
+            for (const [key, count] of Object.entries(dietaryBreakdown).sort((a,b) => a[0].localeCompare(b[0]))) {
+                const row = tbody.insertRow();
+                row.innerHTML = `<td>${key}</td><td>${count}</td>`;
+            }
+            dietaryNeedsWrapper.appendChild(table);
+
+            // Room Contingency Table
+            const roomWrapper = document.getElementById('room-table-wrapper');
+            roomWrapper.innerHTML = '';
+            const roomCounts = guestData.reduce((acc, guest) => {
+                let roomType = guest.room || 'Non spécifié';
+                 if (roomType.toLowerCase().startsWith('cosy')) {
+                    roomType = 'Cosy';
+                } else if (roomType.toLowerCase().startsWith('cocoon')) {
+                    roomType = 'Cocoon';
+                } else if (roomType.toLowerCase().startsWith('suite')) {
+                    roomType = 'Suite';
+                } else if (roomType.toLowerCase() === 'pas de chambre') {
+                    roomType = 'Pas de Chambre';
+                }
+                acc[roomType] = (acc[roomType] || 0) + 1;
+                return acc;
+            }, {});
+            
+            const uniqueRoomAssignments = new Set();
+            guestData.forEach(guest => {
+                if (guest.room && guest.room.toLowerCase() !== 'pas de chambre' && guest.room.trim() !== '' && guest.room.trim() !== '-') {
+                    uniqueRoomAssignments.add(guest.room);
+                }
+            });
+
+            const uniqueRoomCounts = {
+                'Cosy': 0,
+                'Cocoon': 0,
+                'Suite': 0
+            };
+            uniqueRoomAssignments.forEach(assignment => {
+                if (assignment.toLowerCase().startsWith('cosy')) {
+                    uniqueRoomCounts['Cosy']++;
+                } else if (assignment.toLowerCase().startsWith('cocoon')) {
+                    uniqueRoomCounts['Cocoon']++;
+                } else if (assignment.toLowerCase().startsWith('suite')) {
+                    uniqueRoomCounts['Suite']++;
+                }
+            });
+
+
+            const roomTable = document.createElement('table');
+            roomTable.className = 'contingency-table';
+            roomTable.innerHTML = `<thead><tr><th>Type de Chambre</th><th>Chambres Uniques</th><th>Participants</th></tr></thead><tbody></tbody>`;
+            const roomTbody = roomTable.querySelector('tbody');
+
+            const combinedRoomData = {};
+            for(const type in roomCounts) {
+                if(!combinedRoomData[type]) combinedRoomData[type] = {};
+                combinedRoomData[type].participantCount = roomCounts[type];
+            }
+            for(const type in uniqueRoomCounts) {
+                if(!combinedRoomData[type]) combinedRoomData[type] = {};
+                combinedRoomData[type].uniqueCount = uniqueRoomCounts[type];
+            }
+            
+            for (const [type, counts] of Object.entries(combinedRoomData).sort((a,b) => a[0].localeCompare(b[0]))) {
+                const row = roomTbody.insertRow();
+                row.innerHTML = `<td>${type}</td><td>${counts.uniqueCount || 0}</td><td>${counts.participantCount || 0}</td>`;
+            }
+            roomWrapper.appendChild(roomTable);
+        }
+        
+        // ======================= GUEST LIST LOGIC =======================
+        const guestTableBody = document.getElementById('guest-table-body');
+        const searchInput = document.getElementById('guest-search');
+        const exportBtn = document.getElementById('export-csv-btn');
+        let currentSort = { key: 'name', asc: true };
+
+        function renderGuestTable(data) {
+            guestTableBody.innerHTML = '';
+            data.forEach(guest => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${guest.name}</td>
+                    <td>${guest.invitedBy || '-'}</td>
+                    <td>${guest.table || '-'}</td>
+                    <td>${guest.ageGroup || '-'}</td>
+                    <td>${(guest.dietaryNeeds && guest.dietaryNeeds.toLowerCase() !== 'aucun' && guest.dietaryNeeds.trim() !== '') ? guest.dietaryNeeds : 'Aucun'}</td>
+                    <td>${guest.room || '-'}</td>
+                    <td>${guest.brunch || 'En attente'}</td>
+                `;
+                guestTableBody.appendChild(row);
+            });
+        }
+
+        function sortData(key) {
+            if (currentSort.key === key) {
+                currentSort.asc = !currentSort.asc;
+            } else {
+                currentSort.key = key;
+                currentSort.asc = true;
+            }
+
+            guestData.sort((a, b) => {
+                let valA = a[key] ? String(a[key]).toUpperCase() : '';
+                let valB = b[key] ? String(b[key]).toUpperCase() : '';
+                if (valA < valB) return currentSort.asc ? -1 : 1;
+                if (valA > valB) return currentSort.asc ? 1 : -1;
+                return 0;
+            });
+
+            filterAndRender();
+        }
+        
+        function filterAndRender() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredData = guestData.filter(guest => 
+                Object.values(guest).some(val => 
+                    String(val).toLowerCase().includes(searchTerm)
+                )
+            );
+            renderGuestTable(filteredData);
+        }
+
+        function exportToCsv() {
+            const headers = [
+                'Nom', 'Invité par', 'Table', 
+                'Groupe d\'âge', 'Besoins Alimentaires', 'Chambre', 'Brunch 29/06'
+            ];
+            
+            const rows = guestData.map(guest => [
+                `"${guest.name || ''}"`,
+                `"${guest.invitedBy || ''}"`,
+                `"${guest.table || ''}"`,
+                `"${guest.ageGroup || ''}"`,
+                `"${(guest.dietaryNeeds && guest.dietaryNeeds.toLowerCase() !== 'aucun' && guest.dietaryNeeds.trim() !== '') ? guest.dietaryNeeds : 'Aucun'}"`,
+                `"${guest.room || '-'}"`,
+                `"${guest.brunch || 'En attente'}"`
+            ].join(','));
+
+            let csvContent = headers.join(',') + '\n' + rows.join('\n');
+            
+            const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "liste_participants_mariage.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        searchInput.addEventListener('input', filterAndRender);
+        exportBtn.addEventListener('click', exportToCsv);
+        document.querySelectorAll('#guest-table th').forEach(th => {
+            th.addEventListener('click', () => sortData(th.dataset.sort));
+        });
+
+        // ======================= INITIALIZATION =======================
+        setupDashboard();
+        sortData('name'); // Initial sort
+    });
+    </script>
+</body>
+</html>
